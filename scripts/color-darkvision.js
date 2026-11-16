@@ -1,30 +1,30 @@
-// Obojima - Full-Color Darkvision (Foundry VTT v13)
-// Change only the grayscale setting of core Darkvision, on every user's client.
-// Unlike a GM-only macro, a world module is loaded for each connected player.
+const ID = 'obojima-color-darkvision';
 
-function enableColorDarkvision() {
-  const mode = CONFIG.Canvas?.visionModes?.darkvision;
-  const defaults = mode?.vision?.defaults;
-  if (!defaults || typeof defaults.saturation !== "number") {
-    console.warn("Obojima Color Darkvision | Could not locate standard darkvision saturation setting. No changes made.");
-    return false;
-  }
-  try {
-    // -1 is complete desaturation; 0 retains the scene's original colors.
-    defaults.saturation = 0;
-    console.info("Obojima Color Darkvision | Standard Darkvision grayscale disabled for this client.");
-    return true;
-  } catch (error) {
-    console.warn("Obojima Color Darkvision | Could not modify darkvision settings.", error);
-    return false;
-  }
-}
-
-// Run once the game system has had an opportunity to configure vision modes.
-Hooks.once("setup", enableColorDarkvision);
 Hooks.once("ready", () => {
-  // Re-apply after system/module registration; every user's browser executes this.
-  if (enableColorDarkvision() && canvas?.ready) {
-    canvas.perception?.update({ refreshVision: true });
-  }
+  // Wrap the token document class actually in use (dnd5e's subclass, if present).
+  const proto = CONFIG.Token.documentClass.prototype;
+  const original = proto.prepareDerivedData;
+
+  proto.prepareDerivedData = function (...args) {
+    const result = original.apply(this, args);
+    if (this.getFlag(ID, "keepColor")) this.sight.saturation = 0;
+    return result;
+  };
+
+  canvas.tokens?.placeables.forEach(t => t.initializeVisionSource());
+  canvas.perception?.update({ refreshVision: true, refreshLighting: true });
+});
+
+// Add the flag from a macro: select tokens, then run
+// game.modules.get("no-grayscale-darkvision").api.toggle()
+Hooks.once("init", () => {
+  game.modules.get(ID).api = {
+    async toggle() {
+      for (const t of canvas.tokens.controlled) {
+        await t.document.setFlag(ID, "keepColor", !t.document.getFlag(ID, "keepColor"));
+        t.initializeVisionSource();
+      }
+      canvas.perception.update({ refreshVision: true, refreshLighting: true });
+    }
+  };
 });

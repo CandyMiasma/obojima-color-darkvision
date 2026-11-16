@@ -1,0 +1,12 @@
+{
+  "id": "obojima-color-darkvision",
+  "title": "Obojima - Full-Color Darkvision",
+  "description": "Removes the grayscale saturation effect from the standard Foundry darkvision vision mode, without turning on global illumination or changing vision range, walls, or token senses. Every connected player loads this adjustment.",
+  "version": "1.0.0",
+  "compatibility": {
+    "minimum": "13",
+    "verified": "14"
+  },
+  "authors": [{"name": "Custom Obojima campaign helper"}],
+  "esmodules": ["scripts/color-darkvision.js"]
+}

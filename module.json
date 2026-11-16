@@ -8,5 +8,6 @@
     "verified": "14"
   },
   "authors": [{"name": "Custom Obojima campaign helper"}],
-  "esmodules": ["scripts/color-darkvision.js"]
+  "esmodules": ["scripts/color-darkvision.js"],
+  "url":"placeholder","manifest": "placeholder", "download": "placeholder"
 }
